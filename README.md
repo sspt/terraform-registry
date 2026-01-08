@@ -17,20 +17,10 @@ It allows you to browse GitHub repositories as Terraform modules and use them in
 
 ## Setup
 
-1. **Build the Docker image**:
+1. **Build and Run the Docker image**:
 
    ```bash
-   docker build -t terraform-registry .
-   ```
-
-2. **Run the container**:
-
-   ```bash
-   # Create a .env file or pass variables directly
-   docker run -d -p 8000:8000 \
-     -e GITHUB_TOKEN=your_github_pat \
-     --name registry \
-     terraform-registry
+   ./build-and-run
    ```
 
 ## Configuration
@@ -38,17 +28,11 @@ It allows you to browse GitHub repositories as Terraform modules and use them in
 | Environment Variable | Description |
 |----------------------|-------------|
 | `GITHUB_TOKEN`       | GitHub PAT (required for private repos, recommended for public) |
-| `TARGET_ORG`         | (Optional) Limit search to a specific GitHub user/org |
-| `MONOREPO_OWNER`     | (Optional) Owner of the monorepo (e.g. `CompanyName`) |
-| `MONOREPO_NAME`      | (Optional) Name of the monorepo (e.g. `terraform-modules`) |
-| `MONOREPO_PATH_PREFIX`| (Optional) Path to modules inside monorepo (e.g. `modules`). Default is root. |
+| `TARGET_ORG`         | Where the app lookup for modules (repos must match the regex: (.*)terraform-(.*)-modules ) |
+| `GITHUB_CLIENT_ID`     | (Optional) GitHub app Client ID (For authorization) |
+| `GITHUB_CLIENT_SECRET`      | (Optional) GitHub app Client Secret (For authorization) |
+| `AUTH_API_KEY`| API Key to use for terraform login |
 
-### Monorepo Mode
-
-If you store all modules in a single repository (e.g. `CompanyName/terraform-modules`), configure the `MONOREPO_*` variables.
-- Modules will be served from subdirectories.
-- Tags on the repo (e.g. `v1.0.0`) will be available as versions for all modules.
-- The UI will list directories in the repo instead of searching for multiple repos.
 
 ## Usage
 
@@ -73,10 +57,4 @@ module "my_vpc" {
 
 Note: Terraform requires HTTPS for non-localhost registries. For production, put this behind an Nginx/LoadBalancer with SSL.
 
-## How it works
-
-1. **Discovery**: `/.well-known/terraform.json` points Terraform to the API.
-2. **Resolution**: `source = "host/ns/name/provider"` translates to a lookup.
-   - The service looks for a GitHub repo named `{name}` or `terraform-{provider}-{name}` in key `{ns}`.
-3. **Download**: Returns a `X-Terraform-Get` header pointing to the GitHub archive zip for the specific tag/version.
 
