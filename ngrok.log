@@ -1,0 +1,18 @@
+t=2026-01-07T15:37:11+0000 lvl=info msg="no configuration paths supplied"
+t=2026-01-07T15:37:11+0000 lvl=info msg="using configuration at default config path" path=/home/silvio/.config/ngrok/ngrok.yml
+t=2026-01-07T15:37:11+0000 lvl=info msg="open config file" path=/home/silvio/.config/ngrok/ngrok.yml err=nil
+t=2026-01-07T15:37:11+0000 lvl=info msg="FIPS 140 mode" enabled=false
+t=2026-01-07T15:37:11+0000 lvl=info msg="starting web service" obj=web addr=127.0.0.1:4040 allow_hosts=[]
+t=2026-01-07T15:37:12+0000 lvl=info msg="client session established" obj=tunnels.session
+t=2026-01-07T15:37:12+0000 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-01-07T15:37:12+0000 lvl=info msg="started tunnel" obj=tunnels name=command_line addr=http://localhost:8000 url=https://vance-scoldable-wrathily.ngrok-free.dev
+t=2026-01-07T15:37:20+0000 lvl=info msg="join connections" obj=join id=2f226e852e6d l=127.0.0.1:8000 r=[2001:67c:1b40:1:811f:11b5:6912:9f80]:52246
+t=2026-01-07T15:37:58+0000 lvl=info msg="join connections" obj=join id=83156e0dacf6 l=127.0.0.1:8000 r=[2001:67c:1b40:1:811f:11b5:6912:9f80]:52246
+t=2026-01-07T15:39:14+0000 lvl=info msg="join connections" obj=join id=7fc8895af436 l=127.0.0.1:8000 r=[2001:67c:1b40:1:811f:11b5:6912:9f80]:52246
+t=2026-01-07T15:39:32+0000 lvl=info msg="join connections" obj=join id=0f468872eaad l=127.0.0.1:8000 r=[2001:67c:1b40:1:811f:11b5:6912:9f80]:52246
+t=2026-01-07T15:42:21+0000 lvl=info msg="join connections" obj=join id=87aa69c67e99 l=127.0.0.1:8000 r=[2001:67c:1b40:1:811f:11b5:6912:9f80]:52246
+t=2026-01-07T15:42:33+0000 lvl=info msg="join connections" obj=join id=cde946195c8b l=127.0.0.1:8000 r=[2001:67c:1b40:1:811f:11b5:6912:9f80]:52246
+t=2026-01-07T15:42:48+0000 lvl=info msg="join connections" obj=join id=51f430bb611b l=127.0.0.1:8000 r=[2001:67c:1b40:1:811f:11b5:6912:9f80]:52246
+t=2026-01-07T15:44:05+0000 lvl=info msg="join connections" obj=join id=6f50747bce4a l=127.0.0.1:8000 r=[2001:67c:1b40:1:811f:11b5:6912:9f80]:52246
+t=2026-01-07T15:50:32+0000 lvl=info msg="join connections" obj=join id=5320f0a7ff28 l=127.0.0.1:8000 r=[2001:67c:1b40:1:811f:11b5:6912:9f80]:60469
+t=2026-01-07T15:50:45+0000 lvl=info msg="join connections" obj=join id=486c89f2d469 l=127.0.0.1:8000 r=[2001:67c:1b40:1:811f:11b5:6912:9f80]:50759

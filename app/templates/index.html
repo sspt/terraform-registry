@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <section class="module-header">
+        <div class="container">
+            {% if providers %}
+                <h1>Available Groups</h1>
+                <p class="text-muted">Select a group to browse its modules.</p>
+            {% else %}
+                <h1>Modules</h1>
+                <form action="/search" method="post" style="max-width: 600px; display: flex; gap: 0.5rem; margin-top: 1rem;">
+                    <input type="search" name="query" placeholder="Search modules..." value="{{ query }}">
+                    <button type="submit" class="btn-primary">Search</button>
+                </form>
+            {% endif %}
+        </div>
+    </section>
+
+    <div class="container" style="margin-top: 2rem; margin-bottom: 2rem;">
+        {% if providers %}
+        <div class="grid" style="grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));">
+            {% for provider in providers %}
+            <a href="/provider/{{ provider.name }}" class="card" style="padding: 2rem; text-align: center; text-decoration: none;">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">📦</div>
+                <h2 style="font-size: 1.5rem; margin-bottom: 0.5rem; text-transform: capitalize;">{{ provider.name }}</h2>
+                <p class="text-muted">{{ provider.module_count }} Modules</p>
+                <div style="margin-top: 1.5rem;">
+                    <span class="btn-primary" style="width: 100%;">Browse Group</span>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+        {% elif modules %}
+        <div class="grid" style="grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));">
+            {% for module in modules %}
+            <article class="card" style="padding: 1.5rem;">
+                <header style="margin-bottom: 1rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                        <h3 style="margin: 0; font-size: 1.25rem;">
+                            <a href="/browse/{{ module.namespace }}/{{ module.parsed_name }}/{{ module.parsed_provider }}">
+                                {{ module.parsed_name }}
+                            </a>
+                        </h3>
+                        <span class="text-muted text-small">{{ module.parsed_provider }}</span>
+                    </div>
+                    <div class="text-small text-muted" style="margin-top: 0.25rem;">{{ module.namespace }}</div>
+                </header>
+                
+                <div style="flex-grow: 1; margin-bottom: 1.5rem;">
+                    <p class="text-muted">{{ module.description }}</p>
+                </div>
+                
+                <footer style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-color); padding-top: 1rem;">
+                    <small>
+                        <strong>Latest:</strong> 
+                        {% if module.versions %}
+                            <span style="color: var(--primary-color); font-weight: 600; background: var(--primary-50); padding: 2px 6px; border-radius: 4px;">{{ module.versions[0] }}</span>
+                        {% else %}
+                            <span class="text-muted">N/A</span>
+                        {% endif %}
+                    </small>
+                    <small class="text-muted">
+                        <a href="{{ module.url }}" target="_blank" style="color: var(--text-muted); text-decoration: none; display: flex; align-items: center; gap: 0.25rem;">
+                            GitHub ↗
+                        </a>
+                    </small>
+                </footer>
+            </article>
+            {% endfor %}
+        </div>
+        {% else %}
+            <div style="text-align: center; padding: 4rem;">
+                <p class="text-muted">No modules found matching your criteria.</p>
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}
