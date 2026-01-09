@@ -119,30 +119,61 @@
     </script>
     {% if api_token %}
     <div id="cli-modal" class="modal-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 1000; justify-content: center; align-items: center;">
-        <div class="modal-content" style="background: var(--bg-surface); padding: 2rem; border-radius: var(--radius-md); border: 1px solid var(--border-color); width: 90%; max-width: 500px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);">
+        <div class="modal-content" style="background: var(--bg-surface); padding: 2rem; border-radius: var(--radius-md); border: 1px solid var(--border-color); width: 90%; max-width: 600px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); max-height: 90vh; overflow-y: auto;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
                 <h3 style="margin: 0; font-size: 1.25rem; font-weight: 600; color: var(--text-main);">Terraform CLI Setup</h3>
                 <button onclick="document.getElementById('cli-modal').style.display='none'" style="background: transparent; border: none; font-size: 1.5rem; color: var(--text-muted); cursor: pointer;">&times;</button>
             </div>
+
+            <!-- TAB HEADERS -->
+            <div class="tabs" style="display: flex; gap: 1rem; border-bottom: 1px solid var(--border-color); margin-bottom: 1.5rem;">
+                <button onclick="switchTab('login')" id="tab-login" class="active-tab" style="background: none; border: none; padding: 0.5rem 0; color: var(--primary-color); border-bottom: 2px solid var(--primary-color); font-weight: 600; cursor: pointer;">Interactive Login</button>
+                <button onclick="switchTab('env')" id="tab-env" style="background: none; border: none; padding: 0.5rem 0; color: var(--text-muted); border-bottom: 2px solid transparent; cursor: pointer;">CI / Env Variables</button>
+            </div>
             
-            <div style="margin-bottom: 1.5rem;">
-                <label style="display: block; font-size: 0.85rem; font-weight: 500; margin-bottom: 0.5rem; color: var(--text-secondary);">1. Run Login Command</label>
-                <div style="background: var(--bg-surface-alt); padding: 0.75rem; border-radius: var(--radius-sm); font-family: monospace; font-size: 0.9rem; border: 1px solid var(--border-color); color: var(--text-main); overflow-x: auto;">
-                    terraform login {{ display_host }}
+            <!-- OPTION 1: TERRAFORM LOGIN -->
+            <div id="content-login">
+                <div style="margin-bottom: 1.5rem;">
+                    <label style="display: block; font-size: 0.85rem; font-weight: 500; margin-bottom: 0.5rem; color: var(--text-secondary);">1. Run Login Command</label>
+                    <div style="background: var(--bg-surface-alt); padding: 0.75rem; border-radius: var(--radius-sm); font-family: monospace; font-size: 0.9rem; border: 1px solid var(--border-color); color: var(--text-main); overflow-x: auto;">
+                        terraform login {{ display_host }}
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 1.5rem;">
+                    <label style="display: block; font-size: 0.85rem; font-weight: 500; margin-bottom: 0.5rem; color: var(--text-secondary);">2. Approve in Browser</label>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0;">
+                        Type <code>yes</code> in your terminal when prompted. Your browser will open and automatically authenticate using your session.
+                    </p>
                 </div>
             </div>
 
-            <div style="margin-bottom: 1.5rem;">
-                <label style="display: block; font-size: 0.85rem; font-weight: 500; margin-bottom: 0.5rem; color: var(--text-secondary);">2. Enter API Token</label>
-                <div style="display: flex; gap: 0.5rem;">
-                    <input type="text" value="{{ api_token }}" readonly style="flex: 1; padding: 0.5rem; background: var(--bg-surface-alt); border: 1px solid var(--border-color); border-radius: var(--radius-sm); color: var(--text-main); font-family: monospace;" onclick="this.select()">
-                    <button onclick="navigator.clipboard.writeText('{{ api_token }}'); this.innerText = 'Copied!'; setTimeout(() => this.innerText = 'Copy', 2000);" style="padding: 0.5rem 1rem; background: var(--primary-color); border: none; border-radius: var(--radius-sm); color: white; cursor: pointer; font-weight: 500;">Copy</button>
+            <!-- OPTION 2: ENV VARS -->
+            <div id="content-env" style="display: none;">
+                <div style="margin-bottom: 1.5rem;">
+                    <label style="display: block; font-size: 0.85rem; font-weight: 500; margin-bottom: 0.5rem; color: var(--text-secondary);">Using .terraformrc (Recommended for CI)</label>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0; margin-bottom: 0.5rem;">
+                        You can configure Terraform to authenticate without interaction by creating a credentials file.
+                    </p>
+                    <div style="background: var(--bg-surface-alt); padding: 0.75rem; border-radius: var(--radius-sm); font-family: monospace; font-size: 0.85rem; border: 1px solid var(--border-color); color: var(--text-main); white-space: pre-wrap;">credentials "{{ display_host }}" { 
+  token = "{{ api_token }}" 
+}</div>
+                     <button onclick="navigator.clipboard.writeText('credentials \'{{ display_host }}\' { \n  token = \'{{ api_token }}\' \n}'); this.innerText = 'Copied!'; setTimeout(() => this.innerText = 'Copy Config', 2000);" style="margin-top: 0.5rem; padding: 0.35rem 0.75rem; background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-sm); color: var(--text-muted); cursor: pointer; font-size: 0.8rem;">Copy Config</button>
+                </div>
+
+                <div style="margin-bottom: 1.5rem;">
+                   <label style="display: block; font-size: 0.85rem; font-weight: 500; margin-bottom: 0.5rem; color: var(--text-secondary);">Using Environment Variable (Shell)</label>
+                   <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0; margin-bottom: 0.5rem;">
+                        Alternatively, you can set the token as an environment variable in your shell.
+                    </p>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <div style="flex: 1; padding: 0.5rem; background: var(--bg-surface-alt); border: 1px solid var(--border-color); border-radius: var(--radius-sm); color: var(--text-main); font-family: monospace; white-space: nowrap; overflow-x: auto;">
+                            export TF_TOKEN_{{ display_host | replace('.', '_') | replace('-', '_') }}="{{ api_token }}"
+                        </div>
+                        <button onclick="navigator.clipboard.writeText('export TF_TOKEN_{{ display_host | replace('.', '_') | replace('-', '_') }}=\'{{ api_token }}\''); this.innerText = 'Copied!'; setTimeout(() => this.innerText = 'Copy', 2000);" style="padding: 0.5rem 1rem; background: var(--primary-color); border: none; border-radius: var(--radius-sm); color: white; cursor: pointer; font-weight: 500;">Copy</button>
+                    </div>
                 </div>
             </div>
-            
-            <p style="margin: 0; font-size: 0.85rem; color: var(--text-muted);">
-                The API token authenticates your Terraform CLI with this registry.
-            </p>
         </div>
     </div>
     <script>
@@ -151,6 +182,23 @@
                 this.style.display = 'none';
             }
         });
+
+        function switchTab(tab) {
+            // Reset styles
+            document.getElementById('tab-login').style.color = 'var(--text-muted)';
+            document.getElementById('tab-login').style.borderBottomColor = 'transparent';
+            document.getElementById('tab-env').style.color = 'var(--text-muted)';
+            document.getElementById('tab-env').style.borderBottomColor = 'transparent';
+            
+            // Hide content
+            document.getElementById('content-login').style.display = 'none';
+            document.getElementById('content-env').style.display = 'none';
+            
+            // Activate selected
+            document.getElementById('tab-' + tab).style.color = 'var(--primary-color)';
+            document.getElementById('tab-' + tab).style.borderBottomColor = 'var(--primary-color)';
+            document.getElementById('content-' + tab).style.display = 'block';
+        }
     </script>
     {% endif %}
 </body>

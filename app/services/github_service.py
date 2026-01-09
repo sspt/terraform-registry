@@ -627,18 +627,27 @@ class GitHubService:
                  repo_name = await self._get_repo_name(client, namespace, name, provider)
             
             if not repo_name:
+                logger.warning(f"Could not resolve repo name for {namespace}/{name}/{provider}")
                 return None
             
             repo_owner = self._get_owner() if self.is_monorepo() else namespace
             
             # 2. Download Zipball from GitHub
+            # Try with 'v' prefix first
             url = f"{settings.github_api_base}/repos/{repo_owner}/{repo_name}/zipball/v{version}"
             logger.info(f"Downloading source from {url}")
             
             response = await client.get(url, headers=self.headers, follow_redirects=True)
+            
             if response.status_code != 200:
-                logger.error(f"Failed to download zip from GitHub: {response.status_code}")
-                return None
+                # Fallback: Try without 'v' prefix
+                logger.info(f"First attempt failed ({response.status_code}). Trying without 'v' prefix.")
+                url = f"{settings.github_api_base}/repos/{repo_owner}/{repo_name}/zipball/{version}"
+                response = await client.get(url, headers=self.headers, follow_redirects=True)
+                
+                if response.status_code != 200:
+                    logger.error(f"Failed to download zip from GitHub: {response.status_code}")
+                    return None
             
             try:
                 source_zip = zipfile.ZipFile(io.BytesIO(response.content))
@@ -663,6 +672,7 @@ class GitHubService:
             with zipfile.ZipFile(output_io, "w", zipfile.ZIP_DEFLATED) as out_zip:
                 # GitHub zipball has a root folder: owner-repo-sha/
                 if not source_zip.namelist():
+                    logger.error("Downloaded zip is empty (no files).")
                     return None
                     
                 root_dir = source_zip.namelist()[0].split("/")[0]
@@ -671,6 +681,8 @@ class GitHubService:
                 if not search_prefix.endswith("/"):
                     search_prefix += "/"
                 
+                logger.info(f"Filtering zip content using prefix: {search_prefix}")
+                
                 found_files = False
                 for file_info in source_zip.infolist():
                     if file_info.filename.startswith(search_prefix):
@@ -678,6 +690,7 @@ class GitHubService:
                         if file_info.filename == search_prefix: 
                             continue 
                             
+                        # Remove the matched prefix to place files at root
                         rel_path = file_info.filename[len(search_prefix):]
                         
                         if not rel_path: continue
@@ -685,6 +698,9 @@ class GitHubService:
                         final_data = source_zip.read(file_info)
                         out_zip.writestr(rel_path, final_data)
                         found_files = True
+            
+                if not found_files:
+                    logger.warning(f"No files found matching prefix {search_prefix}. Available roots: {[n.split('/')[0] for n in source_zip.namelist()[:5]]}")
             
             output_io.seek(0)
             return output_io.read()

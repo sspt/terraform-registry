@@ -18,6 +18,11 @@ class Settings(BaseSettings):
 
     # Authentication
     auth_api_key: str = "" # For Terraform CLI (Bearer token)
+    api_token: str = "" # Alias env var
+
+    @property
+    def effective_api_key(self):
+        return self.auth_api_key or self.api_token
     
     # GitHub OAuth (UI)
     github_client_id: str = ""

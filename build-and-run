@@ -1,2 +1,7 @@
+#!/bin/bash
+# Stop specific container if running
+docker rm -f terraform-registry-app || true
+
 docker build -t terraform-registry .
-docker run -p 8000:8000 --env-file .env terraform-registry
+docker run -d --name terraform-registry-app -p 8000:8000 --env-file .env terraform-registry
+docker logs -f terraform-registry-app

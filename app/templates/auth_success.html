@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div style="display: flex; justify-content: center; align-items: center; min-height: 60vh; text-align: center;">
+    <div style="background: white; padding: 40px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.12); max-width: 500px; width: 100%;">
+        <div style="color: #2da44e; margin-bottom: 20px;">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+            </svg>
+        </div>
+        
+        <h2>Terraform Authorized!</h2>
+        <p style="color: #586069; margin: 20px 0;">The Registry has automatically authenticated your CLI session.</p>
+        <p style="color: #586069;">Redirecting back to Terraform...</p>
+        
+        <div style="margin-top: 30px; margin-bottom: 20px;">
+            <div class="loader" style="margin: 0 auto;"></div>
+        </div>
+
+        <noscript>
+            <p style="margin-top: 20px;">Javascript is disabled. <a href="{{ target_url }}" style="color: var(--primary-color);">Click here to continue</a>.</p>
+        </noscript>
+    </div>
+</div>
+
+<script>
+    setTimeout(function() {
+        window.location.href = "{{ target_url | safe }}";
+    }, 1500);
+</script>
+
+<style>
+.loader {
+  border: 4px solid #f3f3f3;
+  border-radius: 50%;
+  border-top: 4px solid #2da44e;
+  width: 30px;
+  height: 30px;
+  -webkit-animation: spin 1s linear infinite; /* Safari */
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+</style>
+{% endblock %}

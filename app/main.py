@@ -1,11 +1,13 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from fastapi.responses import JSONResponse
 from starlette.middleware.sessions import SessionMiddleware
-from app.api import registry
+from app.api import registry, auth
 from app.web import ui
 from app.config import settings
 from app.services.github_service import github_service
+import asyncio
 
 app = FastAPI(title="Terraform GitHub Registry Proxy")
 
@@ -20,17 +22,27 @@ templates = Jinja2Templates(directory="app/templates")
 
 @app.on_event("startup")
 async def startup_event():
-    await github_service.warmup_cache()
+    # Run warmup in the background so it doesn't block server startup
+    asyncio.create_task(github_service.warmup_cache())
 
 # Service Discovery
-@app.get("/.well-known/terraform.json")
-def service_discovery():
-    return {
-        "modules.v1": "/v1/modules/"
-    }
+@app.api_route("/.well-known/terraform.json", methods=["GET", "HEAD"], response_class=JSONResponse)
+def service_discovery(request: Request):
+    print(f"Service Discovery Hit. Headers: {request.headers}")
+    return JSONResponse(content={
+        "modules.v1": "/v1/modules/",
+        "login.v1": {
+            "client": "terraform-cli",
+            "grant_types": ["authz_code"],
+            "authz": "/v1/login/authorize",
+            "token": "/v1/login/token",
+            "ports": [10009, 10010]
+        }
+    })
 
 # Include Routers
 app.include_router(registry.router, prefix="/v1/modules", tags=["registry"])
+app.include_router(auth.router, tags=["auth"])
 app.include_router(ui.router, tags=["ui"])
 
 if __name__ == "__main__":

@@ -4,23 +4,26 @@ from app.config import settings
 
 # API Authentication (Terraform CLI)
 async def verify_api_key(request: Request):
-    if not settings.auth_api_key:
+    api_key = settings.effective_api_key
+    if not api_key:
         return # Open if no key configured
         
+    # Check Authorization Header
     auth_header = request.headers.get("Authorization")
-    if not auth_header:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, 
-            detail="Missing Authorization Header"
-        )
-    
-    scheme, _, token = auth_header.partition(" ")
-    if scheme.lower() != "bearer" or token != settings.auth_api_key:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, 
-            detail="Invalid API Key"
-        )
-    return token
+    if auth_header:
+        scheme, _, token = auth_header.partition(" ")
+        if scheme.lower() == "bearer" and token == api_key:
+            return token
+            
+    # Check Query Parameter (fallback for binary downloads that might strip headers)
+    token_param = request.query_params.get("token")
+    if token_param and token_param == api_key:
+        return token_param
+
+    raise HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED, 
+        detail="Invalid or Missing API Key"
+    )
 
 # UI Authentication (GitHub OAuth)
 async def get_current_user(request: Request):
