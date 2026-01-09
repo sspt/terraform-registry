@@ -462,7 +462,7 @@ class GitHubService:
                         "provider": provider,
                         "parsed_provider": provider,
                         "repo_name": repo_name,
-                        "path": mpath,
+                        "path": rel_name, # Store relative path (stripped of 'modules/')
                         "description": description,
                         "versions": versions,
                         "stars": 0, 
